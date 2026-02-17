@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Word of the Day</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Georgia', serif;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    header h1 {
+      font-size: 1.6rem;
+      color: #e0c097;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 0.25rem;
+    }
+
+    header .date {
+      font-size: 0.9rem;
+      color: #888;
+      font-style: italic;
+    }
+
+    nav {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    nav button {
+      background: none;
+      border: 1px solid #444;
+      color: #ccc;
+      padding: 0.5rem 1.25rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+
+    nav button:hover, nav button.active {
+      background: #e0c097;
+      color: #1a1a2e;
+      border-color: #e0c097;
+    }
+
+    /* Word of the Day Card */
+    .word-card {
+      background: #16213e;
+      border: 1px solid #2a2a4a;
+      border-radius: 12px;
+      padding: 2.5rem 2rem;
+      text-align: center;
+    }
+
+    .word-card .word {
+      font-size: 2.8rem;
+      color: #e0c097;
+      margin-bottom: 0.25rem;
+      font-weight: bold;
+    }
+
+    .word-card .pronunciation {
+      font-size: 1.1rem;
+      color: #999;
+      font-style: italic;
+      margin-bottom: 1.5rem;
+    }
+
+    .word-card .divider {
+      width: 60px;
+      height: 1px;
+      background: #e0c097;
+      margin: 0 auto 1.5rem;
+    }
+
+    .word-card .definition {
+      font-size: 1.15rem;
+      line-height: 1.7;
+      color: #d0d0d0;
+      margin-bottom: 1.5rem;
+    }
+
+    .word-card .sentence {
+      font-size: 1rem;
+      line-height: 1.6;
+      color: #aaa;
+      font-style: italic;
+      border-left: 3px solid #e0c097;
+      padding-left: 1rem;
+      text-align: left;
+      margin-bottom: 1.5rem;
+    }
+
+    .word-card .context {
+      font-size: 0.9rem;
+      line-height: 1.6;
+      color: #888;
+      text-align: left;
+      background: #111830;
+      padding: 1rem;
+      border-radius: 6px;
+    }
+
+    .word-card .context-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #e0c097;
+      margin-bottom: 0.4rem;
+    }
+
+    .word-card .book-source {
+      font-size: 0.85rem;
+      color: #777;
+      margin-top: 1.25rem;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem 1rem;
+      color: #666;
+    }
+
+    .empty-state p {
+      margin-bottom: 1rem;
+      font-size: 1.1rem;
+    }
+
+    /* Add Word */
+    .add-view {
+      background: #16213e;
+      border: 1px solid #2a2a4a;
+      border-radius: 12px;
+      padding: 2rem;
+    }
+
+    .add-view h2 {
+      font-size: 1.2rem;
+      color: #e0c097;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+
+    .add-row {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .add-row input {
+      flex: 1;
+      background: #111830;
+      border: 1px solid #333;
+      color: #e0e0e0;
+      padding: 0.65rem 0.75rem;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 0.95rem;
+    }
+
+    .add-row input:focus { outline: none; border-color: #e0c097; }
+
+    .field {
+      margin-bottom: 1.25rem;
+    }
+
+    .field label {
+      display: block;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #999;
+      margin-bottom: 0.35rem;
+    }
+
+    .field input, .field textarea {
+      width: 100%;
+      background: #111830;
+      border: 1px solid #333;
+      color: #e0e0e0;
+      padding: 0.65rem 0.75rem;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 0.95rem;
+    }
+
+    .field input:focus, .field textarea:focus { outline: none; border-color: #e0c097; }
+    .field textarea { resize: vertical; min-height: 70px; }
+
+    .btn {
+      padding: 0.6rem 1.5rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.9rem;
+      transition: opacity 0.2s;
+    }
+
+    .btn:hover { opacity: 0.85; }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .btn-primary {
+      background: #e0c097;
+      color: #1a1a2e;
+      font-weight: bold;
+    }
+
+    .btn-secondary {
+      background: #333;
+      color: #ccc;
+    }
+
+    .btn-danger {
+      background: #5a2020;
+      color: #e07070;
+      margin-left: auto;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+    }
+
+    .preview-card {
+      background: #111830;
+      border: 1px solid #2a2a4a;
+      border-radius: 8px;
+      padding: 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .preview-card .pw { font-size: 1.3rem; color: #e0c097; font-weight: bold; }
+    .preview-card .pp { color: #999; font-style: italic; margin-bottom: 0.5rem; }
+    .preview-card .pd { color: #ccc; margin-bottom: 0.5rem; line-height: 1.5; }
+    .preview-card .ps { color: #aaa; font-style: italic; border-left: 2px solid #e0c097; padding-left: 0.75rem; margin-bottom: 0.5rem; line-height: 1.5; }
+    .preview-card .pc { color: #888; font-size: 0.85rem; line-height: 1.5; }
+
+    .loading-spinner {
+      display: inline-block;
+      width: 18px; height: 18px;
+      border: 2px solid #444;
+      border-top-color: #e0c097;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      vertical-align: middle;
+      margin-right: 0.5rem;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .status-msg {
+      text-align: center;
+      padding: 1rem;
+      color: #999;
+      font-style: italic;
+    }
+
+    /* Word List */
+    .word-list-view h2 {
+      font-size: 1.2rem;
+      color: #e0c097;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    .word-list-view .count {
+      text-align: center;
+      color: #777;
+      font-size: 0.85rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .word-list { list-style: none; }
+
+    .word-list li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      background: #16213e;
+      border: 1px solid #2a2a4a;
+      border-radius: 8px;
+      margin-bottom: 0.5rem;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+
+    .word-list li:hover { border-color: #e0c097; }
+    .word-list .li-word { font-size: 1.05rem; color: #e0c097; font-weight: bold; }
+    .word-list .li-def { font-size: 0.8rem; color: #999; margin-top: 0.2rem; max-width: 500px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .word-list .li-edit { font-size: 0.8rem; color: #999; flex-shrink: 0; margin-left: 1rem; }
+
+    .search-bar { margin-bottom: 1rem; }
+
+    .search-bar input {
+      width: 100%;
+      background: #111830;
+      border: 1px solid #333;
+      color: #e0e0e0;
+      padding: 0.6rem 0.75rem;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 0.95rem;
+    }
+
+    .search-bar input:focus { outline: none; border-color: #e0c097; }
+
+    .data-actions {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+      margin-top: 1.5rem;
+    }
+
+    .data-actions button {
+      background: #222;
+      border: 1px solid #444;
+      color: #aaa;
+      padding: 0.4rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-family: inherit;
+    }
+
+    .data-actions button:hover { border-color: #e0c097; color: #e0c097; }
+
+    #importFile { display: none; }
+
+    /* Settings overlay */
+    .settings-bar {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+
+    .settings-bar button {
+      background: none;
+      border: none;
+      color: #666;
+      font-size: 0.8rem;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .settings-bar button:hover { color: #e0c097; }
+
+    .import-paste {
+      background: #16213e;
+      border: 1px solid #2a2a4a;
+      border-radius: 12px;
+      padding: 2rem;
+    }
+
+    .import-paste h2 {
+      font-size: 1.2rem;
+      color: #e0c097;
+      margin-bottom: 0.5rem;
+      text-align: center;
+    }
+
+    .import-paste .subtitle {
+      font-size: 0.85rem;
+      color: #888;
+      text-align: center;
+      margin-bottom: 1.5rem;
+      line-height: 1.5;
+    }
+
+    .import-paste textarea {
+      width: 100%;
+      background: #111830;
+      border: 1px solid #333;
+      color: #e0e0e0;
+      padding: 0.75rem;
+      border-radius: 6px;
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 0.85rem;
+      min-height: 200px;
+      resize: vertical;
+    }
+
+    .import-paste textarea:focus { outline: none; border-color: #e0c097; }
+
+    .import-paste .paste-actions {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .import-paste .or-divider {
+      text-align: center;
+      color: #555;
+      font-size: 0.8rem;
+      margin: 1.25rem 0;
+    }
+
+    .copy-prompt-section {
+      background: #111830;
+      border: 1px solid #2a2a4a;
+      border-radius: 8px;
+      padding: 1.25rem;
+      margin-top: 1.25rem;
+    }
+
+    .copy-prompt-section h3 {
+      font-size: 0.95rem;
+      color: #e0c097;
+      margin-bottom: 0.4rem;
+    }
+
+    .copy-prompt-section p {
+      font-size: 0.8rem;
+      color: #888;
+      margin-bottom: 0.75rem;
+      line-height: 1.5;
+    }
+
+    .copy-prompt-section .prompt-box {
+      background: #0d1225;
+      border: 1px solid #333;
+      border-radius: 6px;
+      padding: 0.75rem;
+      font-size: 0.8rem;
+      color: #aaa;
+      line-height: 1.5;
+      max-height: 120px;
+      overflow-y: auto;
+      margin-bottom: 0.75rem;
+      white-space: pre-wrap;
+    }
+
+    .auto-generate-bar {
+      text-align: center;
+      margin-top: 1.5rem;
+      padding-top: 1rem;
+    }
+
+    .auto-generate-bar .gen-info {
+      font-size: 0.8rem;
+      color: #666;
+      margin-bottom: 0.5rem;
+    }
+
+    .auto-generate-bar button {
+      background: none;
+      border: 1px solid #444;
+      color: #ccc;
+      padding: 0.45rem 1.25rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+    }
+
+    .auto-generate-bar button:hover {
+      background: #e0c097;
+      color: #1a1a2e;
+      border-color: #e0c097;
+    }
+
+    .auto-generate-bar button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .gen-status {
+      font-size: 0.8rem;
+      color: #999;
+      margin-top: 0.5rem;
+      font-style: italic;
+    }
+
+    .word-card .source-tag {
+      display: inline-block;
+      font-size: 0.7rem;
+      color: #e0c097;
+      border: 1px solid #e0c09766;
+      padding: 0.15rem 0.5rem;
+      border-radius: 3px;
+      margin-top: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .word-list .li-tag {
+      font-size: 0.65rem;
+      color: #e0c097;
+      border: 1px solid #e0c09744;
+      padding: 0.1rem 0.35rem;
+      border-radius: 3px;
+      margin-left: 0.5rem;
+      vertical-align: middle;
+    }
+
+    .paste-result {
+      margin-top: 0.75rem;
+      font-size: 0.85rem;
+      text-align: center;
+    }
+
+    .paste-result .done { color: #7ec87e; }
+    .paste-result .fail { color: #e07070; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Word of the Day</h1>
+      <div class="date" id="todayDate"></div>
+    </header>
+
+    <nav>
+      <button id="navToday" class="active" onclick="showView('today')">Today</button>
+      <button id="navAdd" onclick="showView('add')">Add Word</button>
+      <button id="navList" onclick="showView('list')">All Words</button>
+    </nav>
+
+    <!-- Today's Word -->
+    <div id="viewToday"></div>
+
+    <!-- Add Words -->
+    <div id="viewAdd" style="display:none">
+      <div class="import-paste">
+        <h2>Add Words</h2>
+        <div class="subtitle">Paste JSON from Claude to add words. Just give Claude your word list and ask for the JSON!</div>
+
+        <textarea id="pasteArea" placeholder='Paste JSON here, e.g.:
+[
+  {
+    "word": "Sonder",
+    "pronunciation": "/ˈsɒn.dər/",
+    "definition": "The realization that each passerby has a life as vivid as your own.",
+    "sentence": "A moment of sonder washed over her on the crowded train.",
+    "context": "Coined by John Koenig in The Dictionary of Obscure Sorrows."
+  }
+]'></textarea>
+        <div class="paste-actions">
+          <button class="btn btn-primary" onclick="importFromPaste()">Add Words</button>
+        </div>
+        <div class="paste-result" id="pasteResult"></div>
+
+        <div class="or-divider">— or import from a file —</div>
+
+        <div class="paste-actions">
+          <button class="btn btn-secondary" onclick="document.getElementById('importFile').click()">Import JSON File</button>
+          <button class="btn btn-secondary" onclick="exportWords()">Export Collection</button>
+          <input type="file" id="importFile" accept=".json" onchange="importWords(event)" style="display:none">
+        </div>
+
+        <div class="copy-prompt-section">
+          <h3>Need the prompt?</h3>
+          <p>Copy this and paste it to Claude along with your list of words:</p>
+          <div class="prompt-box" id="promptBox">For each word below, return a JSON array of objects with these keys: "word", "pronunciation" (IPA in slashes), "definition" (1-2 detailed sentences), "sentence" (a vivid example), "context" (2-3 sentences: etymology, related words, cultural notes). Return ONLY the JSON array, no other text.
+
+My words:
+(paste your words here, one per line)</div>
+          <div class="paste-actions">
+            <button class="btn btn-secondary" onclick="copyPrompt()">Copy Prompt</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Edit Word -->
+    <div id="viewEdit" style="display:none">
+      <div class="import-paste">
+        <h2 id="formTitle">Edit Word</h2>
+        <div id="editFields">
+          <div class="field">
+            <label>Word</label>
+            <input type="text" id="fWord">
+          </div>
+          <div class="field">
+            <label>Pronunciation</label>
+            <input type="text" id="fPronunciation">
+          </div>
+          <div class="field">
+            <label>Definition</label>
+            <textarea id="fDefinition"></textarea>
+          </div>
+          <div class="field">
+            <label>Used in a Sentence</label>
+            <textarea id="fSentence"></textarea>
+          </div>
+          <div class="field">
+            <label>Additional Context</label>
+            <textarea id="fContext"></textarea>
+          </div>
+          <div class="field">
+            <label>Book Source</label>
+            <input type="text" id="fBook">
+          </div>
+        </div>
+        <div class="form-actions">
+          <button class="btn btn-primary" onclick="saveWord()">Save</button>
+          <button class="btn btn-secondary" onclick="cancelEdit()">Cancel</button>
+          <button class="btn btn-danger" onclick="deleteWord()">Delete</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Word List -->
+    <div id="viewList" style="display:none">
+      <div class="word-list-view">
+        <h2>Your Word Collection</h2>
+        <div class="count" id="wordCount"></div>
+        <div class="search-bar">
+          <input type="text" id="searchInput" placeholder="Search words..." oninput="renderList()">
+        </div>
+        <ul class="word-list" id="wordList"></ul>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'wotd_words';
+    const SEEN_KEY = 'wotd_seen';
+
+    // ── Initial word data ──
+    const SEED_WORDS = [
+      {
+        word: "Borborygmic",
+        pronunciation: "/ˌbɔːr.bəˈrɪɡ.mɪk/",
+        definition: "Relating to or characterized by borborygmus — the rumbling, gurgling sounds made by the movement of gas and fluid through the intestines.",
+        sentence: "The lecture hall was silent except for the borborygmic protests of his empty stomach, which seemed to grow louder with each passing minute.",
+        context: "From Greek borborygmos, an onomatopoeia imitating the stomach's rumbling. The noun form 'borborygmus' (plural: borborygmi) is used in medical contexts. It's a perfectly normal physiological process caused by peristalsis — the muscular contractions that move food through the digestive tract."
+      },
+      {
+        word: "Vituperation",
+        pronunciation: "/vɪˌtjuː.pəˈreɪ.ʃən/",
+        definition: "Bitter, abusive language or criticism; sustained verbal attack characterized by harsh censure or condemnation.",
+        sentence: "The senator's speech devolved from measured disagreement into full-blown vituperation, leaving even his allies shifting uncomfortably in their seats.",
+        context: "From Latin vituperare, meaning 'to blame or find fault with.' Unlike simple criticism, vituperation implies a sustained, venomous quality — less a single insult than a torrent of abuse. The adjective form is 'vituperative.'"
+      },
+      {
+        word: "Ptarmigan",
+        pronunciation: "/ˈtɑːr.mɪ.ɡən/",
+        definition: "A medium-sized grouse of the genus Lagopus, native to Arctic and subarctic regions, notable for its seasonal plumage changes — turning almost entirely white in winter for camouflage against snow.",
+        sentence: "We nearly walked right past the ptarmigan, its white winter plumage rendering it almost invisible against the snowfield.",
+        context: "The silent 'p' comes from a false Greek etymology applied to the original Scottish Gaelic word tàrmachan. There are three species: the willow ptarmigan (the state bird of Alaska), the rock ptarmigan, and the white-tailed ptarmigan. Their feathered feet act as natural snowshoes."
+      },
+      {
+        word: "Polyphony",
+        pronunciation: "/pəˈlɪf.ə.ni/",
+        definition: "A musical texture consisting of two or more simultaneous, independent melodic lines, as opposed to monophony (a single line) or homophony (a melody with harmonic accompaniment).",
+        sentence: "Bach's fugues remain among the most celebrated examples of polyphony, each voice entering independently yet weaving together into an intricate whole.",
+        context: "From Greek poly (many) + phonē (voice/sound). Polyphony emerged prominently in Western music during the Medieval period and reached its apex in the Renaissance. The term is also used by literary theorist Mikhail Bakhtin to describe novels in which multiple characters' perspectives coexist without being subordinated to the author's single viewpoint."
+      },
+      {
+        word: "Bromides",
+        pronunciation: "/ˈbroʊ.maɪdz/",
+        definition: "Trite, commonplace statements or remarks intended to soothe or placate but lacking originality; clichés offered as if they were profound wisdom.",
+        sentence: "He responded to her grief with well-meaning bromides — 'time heals all wounds,' 'everything happens for a reason' — that only deepened her sense of isolation.",
+        context: "The figurative meaning derives from potassium bromide, which was widely used as a sedative in the 19th century. American humorist Gelett Burgess popularized the social sense in his 1906 book 'Are You a Bromide?', distinguishing bromides (dull, predictable people) from sulphites (original thinkers)."
+      },
+      {
+        word: "Concupiscence",
+        pronunciation: "/kɒnˈkjuː.pɪ.səns/",
+        definition: "Strong, intense desire, especially of a sexual nature; sensual longing or lust.",
+        sentence: "The novel traced the tension between the monk's spiritual devotion and the concupiscence he could never fully suppress.",
+        context: "From Latin concupiscentia, from concupiscere ('to desire eagerly'). The word carries heavy theological weight — in Christian doctrine, particularly Augustinian theology, concupiscence refers to the disordered desire that is a consequence of original sin. It's broader than simple lust, encompassing any intense, ungoverned appetite."
+      },
+      {
+        word: "Equipoise",
+        pronunciation: "/ˈiː.kwɪ.pɔɪz/",
+        definition: "A state of perfect balance or equilibrium between opposing forces, weights, or influences; also, a counterbalancing force.",
+        sentence: "The negotiation had reached a kind of equipoise — neither side willing to concede, but neither able to advance.",
+        context: "From equi- (equal) + poise (weight/balance). In medical ethics, 'clinical equipoise' is a crucial concept: it refers to genuine uncertainty within the expert medical community about which treatment arm in a clinical trial is more beneficial — a prerequisite for ethical randomization of patients."
+      },
+      {
+        word: "Gerontocratic",
+        pronunciation: "/dʒɛˌrɒn.təˈkræt.ɪk/",
+        definition: "Relating to or characteristic of a gerontocracy — a system of governance or social structure in which leadership is held by the elderly.",
+        sentence: "Critics described the politburo as gerontocratic, noting that not a single member of the ruling council was under seventy.",
+        context: "From Greek gerōn (old man) + kratos (rule/power). Gerontocracies can arise formally (as in some traditional societies where councils of elders hold authority) or informally (when aging leaders refuse to cede power). The Soviet Union in the early 1980s is often cited as a modern example."
+      },
+      {
+        word: "Atavistic",
+        pronunciation: "/ˌæt.əˈvɪs.tɪk/",
+        definition: "Relating to or characterized by reversion to something ancient, ancestral, or primitive; exhibiting traits or tendencies that seem to belong to a distant evolutionary or cultural past.",
+        sentence: "Standing at the edge of the forest at dusk, she felt an atavistic unease — a wariness coded into her species long before language existed.",
+        context: "From Latin atavus, meaning 'ancestor' (literally 'great-great-great-grandfather'). In biology, atavism refers to the reappearance of a trait from several generations back (like a human born with a vestigial tail). Figuratively, it describes behaviors or impulses that feel primal or inherited from a more primitive state — often used to describe sudden surges of fear, aggression, or instinct."
+      },
+      {
+        word: "Seine",
+        pronunciation: "/seɪn/",
+        definition: "A large fishing net that hangs vertically in the water, with floats along the top edge and weights along the bottom, used to encircle and trap fish.",
+        sentence: "The fishermen worked in unison, drawing the seine in a wide arc through the shallows until the water within it churned with silver.",
+        context: "From Latin sagena, from Greek sagēnē. There are two main types: a purse seine (which can be drawn closed at the bottom like a drawstring purse, used for schooling fish like tuna and sardines) and a beach seine (hauled from shore). Not to be confused with the Seine River in Paris, though both share the same Latin root."
+      },
+      {
+        word: "Dubbing",
+        pronunciation: "/ˈdʌb.ɪŋ/",
+        definition: "The process of replacing or adding audio to a film, video, or recording — typically to translate dialogue into another language or to add sound effects. Also, the ceremonial act of conferring knighthood by tapping a sword on the shoulders.",
+        sentence: "The dubbing was so seamless that audiences in Madrid had no idea the actors had originally spoken in Korean.",
+        context: "The audio sense comes from 'double,' referring to the duplication of sound. The knighthood sense comes from Old French adober ('to equip with armor'). In music production, 'dub' took on another life entirely — Jamaican dub music, pioneered by King Tubby and Lee 'Scratch' Perry in the 1960s–70s, involves remixing existing recordings with heavy reverb, echo, and bass."
+      },
+      {
+        word: "Fulminate",
+        pronunciation: "/ˈfʊl.mɪ.neɪt/",
+        definition: "To express vehement protest, denunciation, or condemnation; to rail or thunder against something. Also, in chemistry, to explode violently.",
+        sentence: "The editorial fulminated against the proposed legislation, calling it a betrayal of every principle the nation was founded upon.",
+        context: "From Latin fulminare, meaning 'to strike with lightning,' from fulmen ('lightning bolt'). The chemical sense is literal — fulminates are unstable compounds that detonate easily (mercury fulminate was used in early percussion caps). The verbal sense retains that explosive energy: to fulminate is not merely to complain but to thunder with righteous fury."
+      },
+      {
+        word: "Louver",
+        pronunciation: "/ˈluː.vər/",
+        definition: "A set of angled, overlapping slats fitted into a window, door, or vent, designed to allow air and light to pass through while blocking rain, direct sunlight, or outside visibility.",
+        sentence: "Thin bars of afternoon light slipped through the louvers, striping the dim room with gold.",
+        context: "From Old French l'ouvert ('the open one'). The word may also be connected to the Louvre in Paris, which originally had louvered openings in its roof. Louvers appear across architectural traditions — from the jalousie windows common in tropical climates to the ventilation turrets on medieval buildings. In automotive design, louvers are used on rear windows and engine hoods for heat dissipation."
+      },
+      {
+        word: "Anhedonia",
+        pronunciation: "/ˌæn.hɪˈdoʊ.ni.ə/",
+        definition: "The inability to experience pleasure from activities normally found enjoyable, such as eating, socializing, or pursuing hobbies.",
+        sentence: "The anhedonia crept in gradually — first music lost its color, then food its taste, until even a beautiful morning felt like nothing at all.",
+        context: "From Greek an- (without) + hēdonē (pleasure). Coined by French psychologist Théodule-Armand Ribot in 1896. Anhedonia is a core symptom of major depressive disorder and also features in schizophrenia and PTSD. Woody Allen's original title for 'Annie Hall' (1977) was 'Anhedonia,' but the studio insisted on the change."
+      },
+      {
+        word: "Capacious",
+        pronunciation: "/kəˈpeɪ.ʃəs/",
+        definition: "Having a great deal of internal space; roomy and able to hold or contain a large quantity.",
+        sentence: "Her capacious leather bag seemed to contain an entire portable office — laptop, notebooks, chargers, a thermos, and somehow still room for an umbrella.",
+        context: "From Latin capax ('able to hold much'), from capere ('to take, hold'). Related to 'capacity,' 'capable,' and 'capture.' Capacious can describe physical spaces (a capacious hall) but is also used figuratively — a capacious mind, a capacious imagination. It carries a warmer connotation than simply 'large,' suggesting welcoming roominess."
+      },
+      {
+        word: "Oneiric",
+        pronunciation: "/oʊˈnaɪ.rɪk/",
+        definition: "Of, relating to, or suggestive of dreams; having a dreamlike quality.",
+        sentence: "The film's oneiric sequences — slow dissolves, impossible architecture, conversations that looped back on themselves — made it hard to tell where reality ended and sleep began.",
+        context: "From Greek oneiros ('dream'). Related to 'oneiromancy' (divination through dreams) and 'oneironaut' (a lucid dreamer). In film criticism, 'oneiric' is frequently applied to directors like David Lynch, Andrei Tarkovsky, and Luis Buñuel, whose work deliberately mimics the logic — or illogic — of dreaming."
+      },
+      {
+        word: "Palimpsest",
+        pronunciation: "/ˈpæl.ɪmp.sɛst/",
+        definition: "A manuscript page, scroll, or other writing surface that has been scraped clean and reused, often with traces of earlier text still visible beneath. Figuratively, anything bearing visible traces of its earlier forms or layers of history.",
+        sentence: "The city itself was a palimpsest — Roman walls beneath medieval streets beneath Victorian facades, each era incompletely erasing the last.",
+        context: "From Greek palimpsēstos ('scraped again'), from palin ('again') + psēn ('to scrape'). Before paper was cheap, parchment was too valuable to discard, so scribes would scrape off old text and write over it. Modern imaging techniques (like multispectral imaging) have recovered lost works — including a previously unknown text by Archimedes found beneath a 13th-century prayer book. Note: one 'p' at the end."
+      },
+      {
+        word: "Surcease",
+        pronunciation: "/sərˈsiːs/",
+        definition: "The cessation or end of something; relief or respite from an action, condition, or state.",
+        sentence: "After weeks of relentless noise from the construction site, the weekend brought a blessed surcease.",
+        context: "From Old French sursis, past participle of surseoir ('to refrain, delay'). Most famously used by Edgar Allan Poe in 'The Raven' (1845): 'Vainly I had sought to borrow / From my books surcease of sorrow.' The word has a distinctly literary, archaic flavor — you're far more likely to encounter it in poetry or elevated prose than in everyday speech."
+      },
+      {
+        word: "Peripatetic",
+        pronunciation: "/ˌpɛr.ɪ.pəˈtɛt.ɪk/",
+        definition: "Traveling from place to place, especially for work; itinerant. Also, relating to the philosophy of Aristotle, who reportedly taught while walking.",
+        sentence: "Her peripatetic childhood — seven countries before she turned twelve — gave her an unusual fluency with impermanence.",
+        context: "From Greek peripatetikos, from peripatein ('to walk about'), from peri- ('around') + patein ('to walk'). Aristotle's school in Athens was called the Peripatetic school because he lectured while strolling through the Lyceum's covered walkways. The word now generally just means 'wandering' or 'nomadic,' but it carries an intellectual dignity that 'itinerant' lacks."
+      },
+      {
+        word: "Proscenium",
+        pronunciation: "/proʊˈsiː.ni.əm/",
+        definition: "The part of a theater stage situated in front of the curtain, or the arch that frames the stage opening, separating the performance space from the audience.",
+        sentence: "She stood just past the proscenium, half in shadow, half in light — a figure caught between the world of the play and the world of the audience.",
+        context: "From Greek proskenion, from pro- ('before') + skēnē ('tent, stage building'). The proscenium arch became the dominant form of Western theater architecture from the Italian Renaissance onward, creating a 'picture frame' through which audiences view the action. Theater-in-the-round and thrust stages deliberately break this convention to create greater intimacy."
+      },
+      {
+        word: "Videlicet",
+        pronunciation: "/vɪˈdɛl.ɪ.sɛt/",
+        definition: "Namely; that is to say; used to introduce a specific clarification or list of items. Commonly abbreviated as 'viz.'",
+        sentence: "The committee identified three priorities, viz. reducing costs, improving response times, and hiring additional staff.",
+        context: "From Latin vidēre licet, literally 'it is permitted to see' — i.e., 'it may be seen' or 'clearly.' Often confused with 'i.e.' (id est, 'that is') and 'e.g.' (exempli gratia, 'for example'). The key distinction: viz. introduces a complete, specific list or clarification, while e.g. offers partial examples. When reading 'viz.' aloud, it's typically spoken as 'namely' rather than pronounced as a word."
+      },
+      {
+        word: "Concomitant",
+        pronunciation: "/kənˈkɒm.ɪ.tənt/",
+        definition: "Naturally accompanying or associated with something; occurring or existing at the same time as and connected to something else.",
+        sentence: "The rapid industrialization brought concomitant problems — pollution, overcrowding, and a fraying of the social fabric that had held the small town together.",
+        context: "From Latin concomitari ('to accompany'), from con- ('together with') + comitari ('to accompany'), from comes ('companion'). Widely used in academic and medical writing ('the drug and its concomitant side effects'). It can function as both an adjective and a noun — the concomitants of something are the things that naturally come with it."
+      },
+      {
+        word: "Lenticular",
+        pronunciation: "/lɛnˈtɪk.jʊ.lər/",
+        definition: "Shaped like a lentil or biconvex lens. Also refers to a type of cloud (lenticular cloud) that forms in smooth, lens-shaped layers, or to a printing technique that produces images appearing to change or move when viewed from different angles.",
+        sentence: "A massive lenticular cloud hung motionless over the peak, its smooth, stacked layers making it look like a landed spacecraft.",
+        context: "From Latin lenticularis, from lenticula ('small lentil'), diminutive of lens. Lenticular clouds (altocumulus lenticularis) form when moist air flows over mountains and are frequently mistaken for UFOs due to their smooth, disc-like shape. Lenticular printing uses an array of tiny lenses to display different images depending on viewing angle — those 'holographic' bookmarks and postcards from the 1990s are lenticular prints."
+      },
+      {
+        word: "Lummox",
+        pronunciation: "/ˈlʌm.əks/",
+        definition: "A clumsy, slow-witted, or ungainly person; an oaf.",
+        sentence: "He lumbered through the antique shop like a well-meaning lummox, nearly toppling a shelf of porcelain with every turn.",
+        context: "Origin uncertain, likely from an East Anglian English dialect word. First attested in American English in the mid-19th century. Despite its harsh definition, 'lummox' often carries a tone of affection or exasperation rather than genuine cruelty — it tends to describe someone who is large and clumsy rather than malicious. Note: no 'y' at the end."
+      },
+      {
+        word: "Hirsute",
+        pronunciation: "/ˈhɜːr.suːt/",
+        definition: "Having an abundance of hair; hairy or shaggy, especially referring to the body or face.",
+        sentence: "The hirsute stranger filled the doorway, his enormous beard so dense it seemed less grown than constructed.",
+        context: "From Latin hirsutus ('rough, shaggy'). In botany, 'hirsute' has a technical meaning: covered with coarse, stiff hairs (as opposed to 'pubescent,' which means covered with fine, soft hairs). In medicine, 'hirsutism' refers specifically to excessive hair growth in women in areas where hair is typically minimal — a condition with various hormonal causes."
+      },
+      {
+        word: "Bathypelagic",
+        pronunciation: "/ˌbæθ.iˌpɛˈlædʒ.ɪk/",
+        definition: "Relating to or inhabiting the deep ocean zone between approximately 1,000 and 4,000 meters (roughly 3,300 to 13,000 feet) below the surface, where no sunlight penetrates.",
+        sentence: "In the bathypelagic zone, life has adapted to eternal darkness — creatures communicate through bioluminescence and hunt by sensing the faintest vibrations in the water.",
+        context: "From Greek bathys ('deep') + pelagos ('open sea'). The ocean is divided into vertical zones: epipelagic (sunlit, 0–200m), mesopelagic (twilight, 200–1,000m), bathypelagic (midnight, 1,000–4,000m), abyssopelagic (abyss, 4,000–6,000m), and hadopelagic (trenches, 6,000m+). The bathypelagic zone has near-freezing temperatures, crushing pressure, and zero light, yet supports life including giant squid, anglerfish, and vampire squid."
+      },
+      {
+        word: "Imbrication",
+        pronunciation: "/ˌɪm.brɪˈkeɪ.ʃən/",
+        definition: "An overlapping arrangement of edges, like roof tiles, fish scales, or shingles, where each element partially covers the one beneath it.",
+        sentence: "The armor's imbrication of small steel plates allowed the warrior surprising flexibility while still deflecting blows.",
+        context: "From Latin imbrex ('roof tile'), from imber ('rain') — roof tiles overlap to shed rainwater. The pattern appears everywhere in nature: fish scales, pine cones, artichoke leaves, pangolin armor, and sedimentary rock formations. In geology, imbrication of pebbles in a streambed reveals the direction of ancient water flow. The adjective form is 'imbricate.'"
+      },
+      {
+        word: "Ichthyic",
+        pronunciation: "/ˈɪk.θi.ɪk/",
+        definition: "Of, relating to, or resembling fish.",
+        sentence: "The creature's ichthyic features — lidless eyes, gill-like slits along its neck — suggested something that had crawled from the sea and never quite adapted to land.",
+        context: "From Greek ichthys ('fish'). The root appears in many words: ichthyology (study of fish), ichthyosaur (an extinct marine reptile), and ichthys (the fish symbol used by early Christians, from the Greek acronym for 'Jesus Christ, Son of God, Savior'). 'Ichthyic' is rare in everyday use but appears in scientific writing and in literature reaching for a specific, unsettling precision."
+      },
+      {
+        word: "Pellucid",
+        pronunciation: "/pɛˈluː.sɪd/",
+        definition: "Translucently clear in quality or appearance; easily understood. Used of both physical transparency (clear water, clear light) and intellectual clarity (clear writing, clear reasoning).",
+        sentence: "The lake was so pellucid that every stone on the bottom was visible, as if the water were merely a trick of light.",
+        context: "From Latin pellucidus, from per- ('through') + lucere ('to shine'). More refined than 'clear' or 'transparent' — pellucid implies a luminous, almost glowing clarity. Related to 'translucent' and 'lucid.' A pellucid prose style is one that makes complex ideas seem effortless — Orwell and E.B. White are often cited as examples."
+      },
+      {
+        word: "Rictus",
+        pronunciation: "/ˈrɪk.təs/",
+        definition: "A fixed, wide, gaping grimace or grin, often unnatural or unsettling in appearance; the gaping mouth or open jaws of an animal.",
+        sentence: "The mask's frozen rictus — too wide, too many teeth — transformed what should have been a smile into something deeply wrong.",
+        context: "From Latin rictus, past participle of ringi ('to gape, to open the mouth wide'). In zoology, the rictus is the expanse of an open mouth or beak. In common usage, it almost always implies something disturbing — a rictus grin is never warm or genuine. It's the smile of a corpse, a gargoyle, or a person at the edge of madness."
+      },
+      {
+        word: "Sempiternal",
+        pronunciation: "/ˌsɛm.pɪˈtɜːr.nəl/",
+        definition: "Eternal and unchanging; everlasting, with no beginning or end.",
+        sentence: "The philosopher argued that the universe was sempiternal — not created at a single moment but existing, in some form, forever.",
+        context: "From Latin sempiternus, from semper ('always') + aeternus ('eternal'). In medieval theology, a distinction was drawn between 'eternal' (existing outside of time entirely, as God does) and 'sempiternal' (existing within time but lasting forever, as angels or the soul might). In modern usage, this distinction has largely collapsed and the word is used as a more literary synonym for 'eternal.'"
+      },
+      {
+        word: "Thurible",
+        pronunciation: "/ˈθjʊər.ɪ.bəl/",
+        definition: "A metal container, often ornate, suspended on chains and used for burning incense during religious ceremonies; a censer.",
+        sentence: "The priest swung the thurible in slow arcs, trailing pale ribbons of frankincense smoke that curled through the nave like visible prayers.",
+        context: "From Latin thuribulum, from thus/thuris ('incense,' from Greek thyos). The person who carries the thurible is called a thurifer. Thuribles have been used in Christian, Jewish, and pagan worship for millennia. The swinging motion is both practical (it promotes combustion and disperses smoke) and symbolic (representing prayers rising to heaven). Ornate medieval thuribles, some shaped like miniature Gothic cathedrals, survive in church treasuries across Europe."
+      },
+      {
+        word: "Imprecation",
+        pronunciation: "/ˌɪm.prɪˈkeɪ.ʃən/",
+        definition: "A spoken curse; an invocation of evil or misfortune upon someone. Also, the act of cursing.",
+        sentence: "She hurled imprecations at the retreating figure with such creative fury that even the neighbors paused to listen.",
+        context: "From Latin imprecari, from in- ('upon') + precari ('to pray'). The word reveals something interesting about the history of cursing: an imprecation is literally a prayer directed at someone, but a malicious one — praying for harm rather than blessing. The 'imprecatory psalms' in the Bible (e.g., Psalms 69, 109) call upon God to punish enemies, and their inclusion in scripture has been debated by theologians for centuries."
+      },
+      {
+        word: "Chiaroscuro",
+        pronunciation: "/kiˌɑːr.əˈskʊər.oʊ/",
+        definition: "The use of strong contrasts between light and dark in visual art, photography, or cinema to create a sense of volume, drama, and atmosphere.",
+        sentence: "Caravaggio's chiaroscuro was ruthless — his figures emerged from absolute darkness as if lit by a single, unseen flame, every wrinkle and wound rendered in merciless detail.",
+        context: "From Italian chiaro ('light, clear') + oscuro ('dark, obscure'). Pioneered by Leonardo da Vinci and perfected by Caravaggio, Rembrandt, and Vermeer. In cinema, chiaroscuro lighting defines film noir — think of the slanted blinds casting striped shadows across a detective's face. The technique creates a psychological effect: what is hidden in shadow becomes as important as what is illuminated."
+      }
+    ];
+
+    // ── Storage helpers ──
+    function getWords() {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    }
+
+    function setWords(words) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(words));
+    }
+
+    // ── Seed initial words on first load ──
+    (function seedIfEmpty() {
+      if (getWords().length === 0) {
+        const words = SEED_WORDS.map(w => ({
+          ...w,
+          id: crypto.randomUUID(),
+          addedAt: new Date().toISOString()
+        }));
+        setWords(words);
+      }
+    })();
+
+    // ── Seen tracking ──
+    function getSeenIds() {
+      return JSON.parse(localStorage.getItem(SEEN_KEY) || '[]');
+    }
+
+    function markSeen(id) {
+      const seen = getSeenIds();
+      if (!seen.includes(id)) {
+        seen.push(id);
+        localStorage.setItem(SEEN_KEY, JSON.stringify(seen));
+      }
+    }
+
+    function getUnseenWords() {
+      const words = getWords();
+      const seen = new Set(getSeenIds());
+      return words.filter(w => !seen.has(w.id));
+    }
+
+    // ── Today's word ──
+    function getTodayWord() {
+      const words = getWords();
+      if (words.length === 0) return null;
+      const today = new Date();
+      const dateKey = `${today.getFullYear()}-${today.getMonth()+1}-${today.getDate()}`;
+      // Check if we already picked a word today
+      const todayPick = localStorage.getItem('wotd_today_pick');
+      if (todayPick) {
+        try {
+          const pick = JSON.parse(todayPick);
+          if (pick.date === dateKey) {
+            const found = words.find(w => w.id === pick.id);
+            if (found) return found;
+          }
+        } catch {}
+      }
+      // Pick from unseen first, then fall back to all words
+      const unseen = getUnseenWords();
+      const pool = unseen.length > 0 ? unseen : words;
+      const seed = today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
+      const index = seed % pool.length;
+      const picked = pool[index];
+      localStorage.setItem('wotd_today_pick', JSON.stringify({ date: dateKey, id: picked.id }));
+      markSeen(picked.id);
+      return picked;
+    }
+
+    // ── Generate prompt for Claude ──
+    function buildSuggestPrompt() {
+      const words = getWords();
+      const sample = words.slice().sort(() => Math.random() - 0.5).slice(0, 15).map(w => w.word);
+      const allWords = words.map(w => w.word).join(', ');
+      return `I have a Word of the Day app with these words in my collection: ${allWords}
+
+Generate 10 NEW words that match this collection's character — similarly uncommon, literary, evocative, or specialized. Real English words a well-read person might encounter in literature, essays, or nonfiction. Do NOT repeat any word already in my collection.
+
+Return a JSON array of objects with these keys: "word", "pronunciation" (IPA in slashes), "definition" (1-2 detailed sentences), "sentence" (a vivid example), "context" (2-3 sentences: etymology, related words, cultural notes). Return ONLY the JSON array, no other text.`;
+    }
+
+    function copySuggestPrompt() {
+      const prompt = buildSuggestPrompt();
+      navigator.clipboard.writeText(prompt).then(() => {
+        const status = document.getElementById('genStatus');
+        if (status) status.innerHTML = '<span style="color:#7ec87e">Prompt copied! Paste it to Claude, then paste the JSON response back in the Add Words tab.</span>';
+      });
+    }
+
+    // ── Views ──
+    let editingId = null;
+
+    function showView(view) {
+      document.getElementById('viewToday').style.display = view === 'today' ? '' : 'none';
+      document.getElementById('viewAdd').style.display = view === 'add' ? '' : 'none';
+      document.getElementById('viewEdit').style.display = view === 'edit' ? '' : 'none';
+      document.getElementById('viewList').style.display = view === 'list' ? '' : 'none';
+
+      document.getElementById('navToday').classList.toggle('active', view === 'today');
+      document.getElementById('navAdd').classList.toggle('active', view === 'add' || view === 'edit');
+      document.getElementById('navList').classList.toggle('active', view === 'list');
+
+      if (view === 'today') renderToday();
+      if (view === 'list') renderList();
+    }
+
+    function renderToday() {
+      const w = getTodayWord();
+      const el = document.getElementById('viewToday');
+
+      if (!w) {
+        el.innerHTML = '<div class="empty-state"><p>No words yet.</p><button class="btn btn-primary" onclick="showView(\'add\')">Add Your First Word</button></div>';
+        return;
+      }
+
+      const unseen = getUnseenWords();
+      const total = getWords().length;
+      const sourceTag = w.source === 'generated' ? '<div class="source-tag">suggested by Claude</div>' : '';
+      const lowWarning = unseen.length < 5 ? ' — time to add more!' : '';
+
+      el.innerHTML = `
+        <div class="word-card">
+          <div class="word">${esc(w.word)}</div>
+          ${w.pronunciation ? `<div class="pronunciation">${esc(w.pronunciation)}</div>` : ''}
+          <div class="divider"></div>
+          <div class="definition">${esc(w.definition)}</div>
+          ${w.sentence ? `<div class="sentence">"${esc(w.sentence)}"</div>` : ''}
+          ${w.context ? `<div class="context"><div class="context-label">Context</div>${esc(w.context)}</div>` : ''}
+          ${w.book ? `<div class="book-source">from <em>${esc(w.book)}</em></div>` : ''}
+          ${sourceTag}
+        </div>
+        <div class="auto-generate-bar">
+          <div class="gen-info">${unseen.length} unseen word${unseen.length !== 1 ? 's' : ''} remaining out of ${total}${lowWarning}</div>
+          <button id="btnGenMore" onclick="copySuggestPrompt()">Copy Prompt for More Words</button>
+          <div class="gen-status" id="genStatus"></div>
+        </div>`;
+    }
+
+    function renderList() {
+      const words = getWords();
+      const query = document.getElementById('searchInput').value.toLowerCase();
+      const filtered = words.filter(w =>
+        w.word.toLowerCase().includes(query) ||
+        w.definition.toLowerCase().includes(query) ||
+        (w.book || '').toLowerCase().includes(query)
+      );
+
+      document.getElementById('wordCount').textContent = `${words.length} word${words.length !== 1 ? 's' : ''} in your collection`;
+
+      const ul = document.getElementById('wordList');
+      if (filtered.length === 0) {
+        ul.innerHTML = '<li style="justify-content:center;color:#666;cursor:default">No words found</li>';
+        return;
+      }
+
+      ul.innerHTML = filtered.map(w => `
+        <li onclick="editWord('${w.id}')">
+          <div>
+            <span class="li-word">${esc(w.word)}</span>${w.source === 'generated' ? '<span class="li-tag">suggested</span>' : ''}
+            <div class="li-def">${esc(w.definition)}</div>
+          </div>
+          <span class="li-edit">edit</span>
+        </li>`).join('');
+    }
+
+    // ── Edit ──
+    function editWord(id) {
+      const w = getWords().find(w => w.id === id);
+      if (!w) return;
+      editingId = id;
+      document.getElementById('fWord').value = w.word;
+      document.getElementById('fPronunciation').value = w.pronunciation || '';
+      document.getElementById('fDefinition').value = w.definition || '';
+      document.getElementById('fSentence').value = w.sentence || '';
+      document.getElementById('fContext').value = w.context || '';
+      document.getElementById('fBook').value = w.book || '';
+      showView('edit');
+    }
+
+    function saveWord() {
+      const word = document.getElementById('fWord').value.trim();
+      const definition = document.getElementById('fDefinition').value.trim();
+      if (!word || !definition) {
+        alert('Word and definition are required.');
+        return;
+      }
+
+      const entry = {
+        id: editingId || crypto.randomUUID(),
+        word,
+        pronunciation: document.getElementById('fPronunciation').value.trim(),
+        definition,
+        sentence: document.getElementById('fSentence').value.trim(),
+        context: document.getElementById('fContext').value.trim(),
+        book: document.getElementById('fBook').value.trim(),
+        addedAt: editingId ? (getWords().find(w => w.id === editingId)?.addedAt || new Date().toISOString()) : new Date().toISOString()
+      };
+
+      const words = getWords();
+      if (editingId) {
+        const idx = words.findIndex(w => w.id === editingId);
+        if (idx !== -1) words[idx] = entry;
+      } else {
+        words.push(entry);
+      }
+      setWords(words);
+      editingId = null;
+      showView('today');
+    }
+
+    function cancelEdit() {
+      editingId = null;
+      showView('list');
+    }
+
+    function deleteWord() {
+      if (!editingId || !confirm('Delete this word?')) return;
+      setWords(getWords().filter(w => w.id !== editingId));
+      editingId = null;
+      showView('list');
+    }
+
+    // ── Paste import ──
+    function importFromPaste() {
+      const text = document.getElementById('pasteArea').value.trim();
+      const resultEl = document.getElementById('pasteResult');
+      if (!text) return;
+
+      try {
+        // Strip markdown code fences if present
+        const cleaned = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '');
+        let parsed = JSON.parse(cleaned);
+        // Accept single object or array
+        if (!Array.isArray(parsed)) parsed = [parsed];
+
+        const existing = getWords();
+        const existingLower = new Set(existing.map(w => w.word.toLowerCase()));
+        let added = 0;
+
+        for (const w of parsed) {
+          if (w.word && w.definition && !existingLower.has(w.word.toLowerCase())) {
+            existing.push({
+              id: crypto.randomUUID(),
+              word: w.word,
+              pronunciation: w.pronunciation || '',
+              definition: w.definition || '',
+              sentence: w.sentence || '',
+              context: w.context || '',
+              book: w.book || '',
+              source: w.source || 'generated',
+              addedAt: new Date().toISOString()
+            });
+            existingLower.add(w.word.toLowerCase());
+            added++;
+          }
+        }
+
+        setWords(existing);
+        document.getElementById('pasteArea').value = '';
+        resultEl.innerHTML = `<span class="done">${added} word${added !== 1 ? 's' : ''} added!</span>`;
+      } catch (e) {
+        resultEl.innerHTML = `<span class="fail">Could not parse JSON. Make sure you pasted the full response from Claude.</span>`;
+      }
+    }
+
+    function copyPrompt() {
+      const text = document.getElementById('promptBox').textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Prompt copied to clipboard!');
+      });
+    }
+
+    // ── Export / Import ──
+    function exportWords() {
+      const data = JSON.stringify(getWords(), null, 2);
+      const blob = new Blob([data], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'word-collection.json';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    function importWords(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (!Array.isArray(imported)) throw new Error('Invalid');
+          const existing = getWords();
+          const existingLower = new Set(existing.map(w => w.word.toLowerCase()));
+          let added = 0;
+          for (const w of imported) {
+            if (w.word && w.definition && !existingLower.has(w.word.toLowerCase())) {
+              if (!w.id) w.id = crypto.randomUUID();
+              if (!w.addedAt) w.addedAt = new Date().toISOString();
+              existing.push(w);
+              added++;
+            }
+          }
+          setWords(existing);
+          alert(`Imported ${added} new word${added !== 1 ? 's' : ''}.`);
+          if (document.getElementById('searchInput')) renderList();
+        } catch {
+          alert('Could not import file. Make sure it is valid JSON.');
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = '';
+    }
+
+    function esc(str) {
+      const d = document.createElement('div');
+      d.textContent = str;
+      return d.innerHTML;
+    }
+
+    // ── Init ──
+    const today = new Date();
+    document.getElementById('todayDate').textContent = today.toLocaleDateString('en-US', {
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+    });
+
+    renderToday();
+  </script>
+</body>
+</html>
