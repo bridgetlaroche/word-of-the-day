@@ -1112,8 +1112,19 @@ Return a JSON array of objects with these keys: "word", "pronunciation" (IPA in 
       if (!text) return;
 
       try {
-        // Strip markdown code fences if present
-        const cleaned = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '');
+        // Strip markdown code fences and any surrounding text
+        let cleaned = text;
+        // Remove ```json ... ``` blocks (grab content between fences)
+        const fenceMatch = cleaned.match(/```(?:json)?\s*\n?([\s\S]*?)\n?\s*```/i);
+        if (fenceMatch) {
+          cleaned = fenceMatch[1];
+        }
+        // If no fences, try to find the JSON array directly
+        if (!cleaned.trim().startsWith('[') && !cleaned.trim().startsWith('{')) {
+          const arrMatch = cleaned.match(/(\[[\s\S]*\])/);
+          if (arrMatch) cleaned = arrMatch[1];
+        }
+        cleaned = cleaned.trim();
         let parsed = JSON.parse(cleaned);
         // Accept single object or array
         if (!Array.isArray(parsed)) parsed = [parsed];
